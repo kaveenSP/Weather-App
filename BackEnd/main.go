@@ -1,33 +1,23 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
-
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"os"
+	"strings"
 )
 
 func main() {
 
-	e := echo.New()
-	e.Use(middleware.CORS())
-	e.Use(middleware.Logger())
-	e.GET("/wData", getWeatherData)
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("\nEnter the City : ")
+	input, _ := reader.ReadString('\n')
 
-	e.Logger.Fatal(e.Start(":8000"))
-
-	// reader := bufio.NewReader(os.Stdin)
-	// fmt.Print("\nEnter the City : ")
-	// input, _ := reader.ReadString('\n')
-	// city := strings.TrimSpace(input)
-}
-
-func getWeatherData(c echo.Context) error {
-	city := c.QueryParam("city")
+	city := strings.TrimSpace(input)
 	apiKEY := "16075fb73e3147dcedf3ebfe6cbac2af"
 	gLocation := "https://api.openweathermap.org/geo/1.0/direct?q=" + city + "+&limit=5&appid=" + apiKEY
 
@@ -35,11 +25,20 @@ func getWeatherData(c echo.Context) error {
 
 	responseData, _ := ioutil.ReadAll(res.Body)
 	res.Body.Close()
+
 	var jsonData geoLocation
 
+	// valid := json.Valid(responseData)
+
 	json.Unmarshal(responseData, &jsonData)
+	// fmt.Printf("%#v \n", jsonData)
+	// fmt.Println(jsonData[0])
 
 	weatherURL := fmt.Sprintf("https://api.openweathermap.org/data/2.5/weather?lat=%f&lon=%f&appid=%s", jsonData[0].Latitude, jsonData[0].Longitude, apiKEY)
+
+	country := jsonData[0].Country
+
+	// fmt.Println(weatherURL)
 
 	u, _ := url.Parse(weatherURL)
 
@@ -50,18 +49,20 @@ func getWeatherData(c echo.Context) error {
 
 	var wJsonData weatherData
 	json.Unmarshal(wResponseData, &wJsonData)
+	// fmt.Println(wJsonData)
+	// final, _ := json.MarshalIndent(wJsonData, "", "\t")
+	// fmt.Printf("%s\n", final)
 
-	country := jsonData[0].Country
-	temp := fmt.Sprintf("%.2f", FarToCel(wJsonData.Main.Temp))
-	pressure := fmt.Sprintf("%d", wJsonData.Main.Pressure)
-	humidity := fmt.Sprintf("%d", wJsonData.Main.Humidity)
+	temp := FarToCel(wJsonData.Main.Temp)
+	pressure := wJsonData.Main.Pressure
+	humidity := wJsonData.Main.Humidity
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"country":  country,
-		"temp":     temp,
-		"pressure": pressure,
-		"humidity": humidity,
-	})
+	fmt.Println("\nCountry : " + country)
+	fmt.Println("\nCity : " + city)
+	fmt.Printf("\nTemperature : %f C\n", temp)
+	fmt.Printf("\nPressure : %d hpa\n", pressure)
+	fmt.Printf("\nHumidity : %d %%\n", humidity)
+
 }
 
 type geoLocation []struct {
@@ -88,10 +89,3 @@ func FarToCel(farTemp float64) float64 {
 	celTemp := farTemp - 273.15
 	return celTemp
 }
-
-// valid := json.Valid(responseData)
-// fmt.Printf("%#v \n", jsonData)
-// fmt.Println(jsonData[0])
-// fmt.Println(wJsonData)
-// final, _ := json.MarshalIndent(wJsonData, "", "\t")
-// fmt.Printf("%s\n", final)
