@@ -1,0 +1,61 @@
+<div class="upper_mainContainer">
+  <div style="width: 100%; height:115px;">
+    <div class="logo" style="top:35px; color: #F78032;">Evo</div>
+    <div class="logo" style="top:65px;">Weather</div>
+  </div>
+  <div style="display: flex;">
+    <div style="flex:1 1 37%; height:calc(100vh - 125px);">
+      <div class="left-card" [@opacityDrop]="state">
+        <div>
+          <div style="font-size: 25px;">Did You Know ?</div>
+            <ul>
+              <li>
+                Highest temperature recorded on Earth : 56.7 &#8451; 
+              </li>
+              <br>
+              <li>
+                Lowest Temperature recorded on Earth : -128.5 &#8451;
+              </li>
+              <br>
+              <li>
+                Fastest speed a raindrop can hit you : 18 mph
+              </li>
+              <br>
+              <li>
+                Strongest wind ever recorderd :
+                <br> 231 mph
+              </li>
+          </ul>
+        </div>
+      </div>
+      <div class="card-behind" [@opacityGain]="stateBehind">
+        <div class="country">{{city}} , {{webResponse.country}} <fa-icon [icon]="faEarthAmericas" style="font-size: 60px;"></fa-icon></div>
+        <span class="temp"><fa-icon [icon]="faThermometerHalf" style="font-size: 50px;"></fa-icon> &nbsp;&nbsp;
+          <span style="font-size: 50px;">{{webResponse.temp}}</span> &#8451;</span>
+        <span class="pressure">
+          Pressure <fa-icon [icon]="faGaugeMed" style="color: #F55210;"></fa-icon> 
+          <br>
+          <span style="font-size:39px ;">
+            {{webResponse.pressure}}
+          </span>
+          hpa
+        </span>
+        <span class="humidity"><fa-icon [icon]="faDroplet" style="color: #1DE0DD;"></fa-icon> Humidity 
+          <br>
+          <span style="font-size: 39px;">{{webResponse.humidity}} %</span>
+        </span>
+      </div>
+    </div>
+    <div style="flex:1 1 63%; height:calc(100vh - 125px);">
+      <form method="" action="">
+        <div id="search-title">Know <span style="color: #F78032;">Your</span> Weather</div>
+        <input type="search" placeholder="Search For City . . ." name="city">
+        <br>
+        <button>Find My Location</button>
+        <button (click)="getCountry()" >Search</button>
+    </form>
+    </div>
+  </div>
+</div>
+
+<router-outlet></router-outlet>
